@@ -45,6 +45,9 @@ static int tjs_init(JSContext *ctx, JSModuleDef *m) {
     tjs_mod_streams_init(ctx, m);
     tjs_mod_timers_init(ctx, m);
     tjs_mod_udp_init(ctx, m);
+#ifdef TJS_HAVE_WAVM
+    tjs_mod_wasm_init(ctx, m);
+#endif
     tjs_mod_worker_init(ctx, m);
 #ifdef TJS_HAVE_CURL
     tjs_mod_xhr_init(ctx, m);
@@ -69,6 +72,9 @@ JSModuleDef *js_init_module_uv(JSContext *ctx, const char *name) {
     tjs_mod_signals_export(ctx, m);
     tjs_mod_timers_export(ctx, m);
     tjs_mod_udp_export(ctx, m);
+#ifdef TJS_HAVE_WAVM
+    tjs_mod_wasm_export(ctx, m);
+#endif
     tjs_mod_worker_export(ctx, m);
 #ifdef TJS_HAVE_CURL
     tjs_mod_xhr_export(ctx, m);

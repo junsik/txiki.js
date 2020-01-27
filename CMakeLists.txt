@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
 
-project(tjs LANGUAGES C)
+project(tjs LANGUAGES C CXX)
 
 include(GNUInstallDirs)
 
@@ -22,16 +22,6 @@ configure_file(
 )
 
 
-include(${CMAKE_SOURCE_DIR}/src/js/CMakeLists.txt)
-
-option(libuv_buildtests "" OFF)
-add_subdirectory(deps/libuv EXCLUDE_FROM_ALL)
-add_subdirectory(deps/quickjs EXCLUDE_FROM_ALL)
-option(REPLXX_BUILD_EXAMPLES "" OFF)
-option(BUILD_SHARED_LIBS "" OFF)
-add_subdirectory(deps/replxx EXCLUDE_FROM_ALL)
-
-
 macro(cpr_option OPTION_NAME OPTION_TEXT OPTION_DEFAULT)
     option(${OPTION_NAME} ${OPTION_TEXT} ${OPTION_DEFAULT})
     if(DEFINED ENV{${OPTION_NAME}})
@@ -43,6 +33,29 @@ macro(cpr_option OPTION_NAME OPTION_TEXT OPTION_DEFAULT)
     endif()
     message(STATUS "  ${OPTION_NAME}: ${${OPTION_NAME}}")
 endmacro()
+
+
+include(${CMAKE_SOURCE_DIR}/src/js/CMakeLists.txt)
+add_subdirectory(deps/quickjs EXCLUDE_FROM_ALL)
+
+option(libuv_buildtests "" OFF)
+add_subdirectory(deps/libuv EXCLUDE_FROM_ALL)
+
+option(REPLXX_BUILD_EXAMPLES "" OFF)
+option(BUILD_SHARED_LIBS "" OFF)
+add_subdirectory(deps/replxx EXCLUDE_FROM_ALL)
+
+cpr_option(DISABLE_WASM "If ON, WASM support will be disabled" OFF)
+if (NOT DISABLE_WASM)
+    find_package(LLVM CONFIG)
+    if(NOT LLVM_CONFIG)
+        message(STATUS "Not building WASM support, LLVM not found.")
+    else()
+        option(WAVM_ENABLE_STATIC_LINKING "" ON)
+        option(WAVM_ENABLE_FUZZ_TARGETS "" OFF)
+        add_subdirectory(deps/wavm EXCLUDE_FROM_ALL)
+    endif()
+endif()
 
 cpr_option(DISABLE_CURL "If ON, curl support will be disabled" OFF)
 cpr_option(USE_SYSTEM_CURL "If ON, this project will look in the system paths for an installed curl library" ON)
@@ -83,6 +96,7 @@ add_executable(tjs
     src/utils.c
     src/version.c
     src/vm.c
+    src/wasm.c
     src/worker.c
     src/xhr.c
     ${CMAKE_CURRENT_BINARY_DIR}/js.c
@@ -104,6 +118,13 @@ if (CURL_FOUND)
     )
     target_include_directories(tjs PRIVATE ${CURL_INCLUDE_DIRS})
     target_link_libraries(tjs ${CURL_LIBRARIES})
+endif()
+
+if (LLVM_CONFIG)
+    target_compile_definitions(tjs PRIVATE
+        TJS_HAVE_WAVM
+    )
+    target_link_libraries(tjs libWAVM)
 endif()
 
 target_link_libraries(tjs qjs uv_a m replxx stdc++)

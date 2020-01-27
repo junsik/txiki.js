@@ -87,6 +87,8 @@ void tjs_mod_timers_init(JSContext *ctx, JSModuleDef *m);
 void tjs_mod_timers_export(JSContext *ctx, JSModuleDef *m);
 void tjs_mod_udp_init(JSContext *ctx, JSModuleDef *m);
 void tjs_mod_udp_export(JSContext *ctx, JSModuleDef *m);
+void tjs_mod_wasm_init(JSContext *ctx, JSModuleDef *m);
+void tjs_mod_wasm_export(JSContext *ctx, JSModuleDef *m);
 void tjs_mod_worker_init(JSContext *ctx, JSModuleDef *m);
 void tjs_mod_worker_export(JSContext *ctx, JSModuleDef *m);
 void tjs_mod_xhr_init(JSContext *ctx, JSModuleDef *m);

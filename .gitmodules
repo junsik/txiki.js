@@ -8,3 +8,6 @@
 [submodule "deps/replxx"]
 	path = deps/replxx
 	url = https://github.com/AmokHuginnsson/replxx.git
+[submodule "deps/wavm"]
+	path = deps/wavm
+	url = https://github.com/WAVM/WAVM.git
